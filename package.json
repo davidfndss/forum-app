@@ -30,7 +30,8 @@
     "reflect-metadata": "^0.1.13",
     "rxjs": "^7.5.5",
     "vite": "^4.0.4",
-    "vue": "^3.2.45"
+    "vue": "^3.2.45",
+    "zod": "^3.23.8"
   },
   "devDependencies": {
     "@nestjs/cli": "^9.0.0",

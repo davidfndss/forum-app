@@ -8,13 +8,13 @@ export class AnswersService {
   @Inject()
   private readonly prisma: PrismaService
   
-  create(createAnswerDto: CreateAnswerDto, userId: number, questionId: number) {
+  create(createAnswerDto: CreateAnswerDto, sub: any, questionId: number) {
 
     return this.prisma.answers.create({ 
       data: {
         body: createAnswerDto.body, 
         user: {
-          connect:  { id: userId }
+          connect:  { id: sub.userId }
         }, 
         question: {
           connect: { id: questionId }
@@ -32,6 +32,7 @@ export class AnswersService {
   }
 
   update(id: number, updateAnswerDto: UpdateAnswerDto) {
+    console.log(id)
     return this.prisma.answers.update({ where: {id}, data: updateAnswerDto })
   }
 
