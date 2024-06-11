@@ -1,4 +1,5 @@
-import { Inject, Injectable } from '@nestjs/common';
+import { Inject, Injectable, 
+  InternalServerErrorException } from '@nestjs/common';
 import { Prisma, User } from '@prisma/client'
 import { PrismaService } from 'src/database/prisma.service'
 import * as bcrypt from 'bcrypt'
@@ -33,12 +34,35 @@ export class UserService {
   async updateUser(params: {
     where: Prisma.UserWhereUniqueInput,
     data: Prisma.UserUpdateInput
-  }): Promise<User> {
+  }): Promise<Omit<User, 'password'>> {
     const { where, data } = params
-    return this.prisma.user.update({
-      data,
-      where,
-    });
+
+    const extractUser = (user) => {
+      const { id, name, email, createdAt, updatedAt } = user;
+      return { id, name, email, createdAt, updatedAt };
+    };
+
+    // If the user send the password to update, it will hash and return the user without the password parameter
+    try {
+      let updatedUser;
+      if (data.password) {
+        const hashedPassword = await bcrypt.hash(data.password.toString(), 10);
+        updatedUser = await this.prisma.user.update({
+          data: { ...data, password: hashedPassword },
+          where,
+        });
+      } else {
+        updatedUser = await this.prisma.user.update({
+          data,
+          where,
+        });
+      }
+      return extractUser(updatedUser);
+    } catch (error) {
+      throw new InternalServerErrorException();
+    }
+
+    
   }
   
   async deleteUser( where: Prisma.UserWhereUniqueInput ): Promise<User> {
